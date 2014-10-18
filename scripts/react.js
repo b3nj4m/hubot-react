@@ -34,7 +34,7 @@ function uniqueStems(text) {
 
 var successTmpl = _.template('reacting to <%= term %> with <%= response %>');
 var responseTmpl = _.template('<%= response %>');
-var ignoredTmpl = _.template('not reacting to <%= term %> with <%= response %>');
+var ignoredTmpl = _.template('no longer reacting to <%= term %> with <%= response %>');
 
 function randomItem(list) {
   return list[_.random(list.length - 1)];
