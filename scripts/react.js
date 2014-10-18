@@ -168,9 +168,10 @@ function start(robot) {
 
   var hubotMessageRegex = new RegExp('^[@]?' + robot.name + '[:,]?\\s', 'i');
 
-  robot.respond(/react (\w*) (.*)/i, function(msg) {
-    var term = msg.match[1];
-    var response = msg.match[2];
+  robot.respond(/react ((\w*)|"(((\s*)?\w)*)") (.*)/i, function(msg) {
+    var term = msg.match[2] || msg.match[3];
+    var response = msg.match[6];
+    //TODO data store needs to support multi-word term
 
     var responseObj = add(term, response);
 
