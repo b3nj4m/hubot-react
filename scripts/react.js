@@ -32,8 +32,9 @@ function uniqueStems(text) {
   return _.unique(stemmer.tokenizeAndStem(text));
 }
 
-var successTmpl = _.template('<%= term %> => <%= response %>');
+var successTmpl = _.template('reacting to <%= term %> with <%= response %>');
 var responseTmpl = _.template('<%= response %>');
+var ignoredTmpl = _.template('not reacting to <%= term %> with <%= response %>');
 
 function randomItem(list) {
   return list[_.random(list.length - 1)];
@@ -45,6 +46,10 @@ function responseToString(response) {
 
 function successMessage(response) {
   return successTmpl(response);
+}
+
+function ignoredMessage(response) {
+  return ignoredTmpl(response);
 }
 
 function getResponses(retrieve, store, text) {

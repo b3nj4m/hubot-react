@@ -1,10 +1,10 @@
 ### hubot-react
 
-Train hubot to react to certain terms.
+Train hubot to react to certain terms. Multiple responses to the same term are allowed. One will be selected at-random.
 
 ```
 Bob: hubot react homestar seriously.
-Hubot: homestar will trigger seriously.
+Hubot: reacting to homestar with seriously.
 ...
 Alice: Homestar Runner is the best.
 Hubot: seriously.
