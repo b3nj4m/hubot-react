@@ -12,8 +12,6 @@ Hubot: seriously.
 
 Configuration:
 
-- `HUBOT_REACT_CACHE_SIZE=N` - Cache the last N messages for each user for potential remembrance (default 25).
-
 - `HUBOT_REACT_STORE_SIZE=N` - Remember at most N messages (default 200).
 
 

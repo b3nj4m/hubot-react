@@ -6,7 +6,6 @@
 //   "natural": "~0.1.28"
 //
 // Configuration:
-//   HUBOT_REACT_CACHE_SIZE=N - Cache the last N messages for each user for potential remembrance (default 25).
 //   HUBOT_REACT_STORE_SIZE=N - Remember at most N messages (default 200).
 //
 // Commands:
@@ -21,7 +20,6 @@ var natural = require('natural');
 
 var stemmer = natural.PorterStemmer;
 
-var CACHE_SIZE = process.env.HUBOT_REACT_CACHE_SIZE ? parseInt(process.env.HUBOT_REACT_CACHE_SIZE) : 25;
 var STORE_SIZE = process.env.HUBOT_REACT_STORE_SIZE ? parseInt(process.env.HUBOT_REACT_STORE_SIZE) : 200;
 
 var lastUsedResponse = null;
@@ -58,11 +56,33 @@ function getResponses(retrieve, store, text) {
   })));
 }
 
+function ensureStoreSize(messageStore, size) {
+  var storeSize = _.reduce(_.values(messageStore), function(memo, value) {
+    return memo + _.size(value);
+  }, 0);
+
+  var keys = _.keys(_.first(messageStore));
+  var key;
+  var termKeys;
+  while (storeSize > size) {
+    key = randomItem(keys);
+    termKeys = _.keys(messageStore[key]);
+
+    if (termKeys.length > 0) {
+      delete messageStore[key][randomItem(termKeys)];
+      storeSize--;
+    }
+  }
+}
+
 function addResponse(retrieve, store, term, response) {
   var stem = firstStem(term);
   var messageStore = retrieve('reactMessageStore');
 
+  ensureStoreSize(messageStore, STORE_SIZE - 1);
+
   messageStore[stem] = messageStore[stem] || {};
+
   messageStore[stem][response] = {
     term: term,
     stem: stem,
@@ -128,9 +148,13 @@ function start(robot) {
   robot.brain.setAutoSave(true);
 
   var messageStore = retrieve('reactMessageStore');
-  if (!messageStore) {
-    store('reactMessageStore', {});
+  if (messageStore) {
+    ensureStoreSize(messageStore, STORE_SIZE);
   }
+  else {
+    messageStore = {};
+  }
+  store('reactMessageStore', messageStore);
 
   var hubotMessageRegex = new RegExp('^[@]?' + robot.name + '[:,]?\\s', 'i');
 
