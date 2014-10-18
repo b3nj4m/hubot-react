@@ -52,7 +52,7 @@ function getResponses(retrieve, store, text) {
   var messageStore = retrieve('reactMessageStore');
 
   return _.flatten(_.compact(_.map(stems, function(stem) {
-    return messageStore[stem] === undefined ? null, _.values(messageStore[stem]);
+    return messageStore[stem] === undefined ? null : _.values(messageStore[stem]);
   })));
 }
 
