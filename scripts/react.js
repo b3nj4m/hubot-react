@@ -142,8 +142,8 @@ function start(robot) {
   var retrieve = robotRetrieve.bind(this, robot);
 
   var get = getResponses.bind(this, retrieve, store);
-  var add addResponse.bind(this, retrieve, store);
-  var del deleteResponse.bind(this, retrieve, store);
+  var add = addResponse.bind(this, retrieve, store);
+  var del = deleteResponse.bind(this, retrieve, store);
 
   robot.brain.setAutoSave(true);
 
