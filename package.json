@@ -1,0 +1,25 @@
+{
+  "name": "hubot-react",
+  "version": "0.1.0",
+  "description": "Train hubot to react to certain terms.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/b3nj4m/hubot-react"
+  },
+  "keywords": [
+    "hubot"
+  ],
+  "author": "Ben Robbins <ben.robbins@gmail.com> (https://b3nj4m.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/b3nj4m/hubot-react/issues"
+  },
+  "dependencies": {
+    "underscore": "~1.7.0",
+    "natural": "~0.1.28"
+  }
+}
