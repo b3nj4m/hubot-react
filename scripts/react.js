@@ -107,8 +107,10 @@ function addResponse(retrieve, store, term, response) {
 function deleteResponse(retrieve, store, term, response) {
   var messageStore = retrieve('reactMessageStore');
 
-  if (messageStore[term] !== undefined && messageStore[term][response] !== undefined) {
-    delete messageStore[term][response];
+  var stem = firstStem(term);
+
+  if (messageStore[stem] !== undefined && messageStore[stem][response] !== undefined) {
+    delete messageStore[stem][response];
 
     store('reactMessageStore', messageStore);
 
