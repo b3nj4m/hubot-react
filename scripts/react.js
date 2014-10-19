@@ -9,7 +9,8 @@
 //   HUBOT_REACT_STORE_SIZE=N - Remember at most N messages (default 200).
 //
 // Commands:
-//   hubot react <term> <response> - tell hubot to react with <response> when it hears <term>
+//   hubot react <term> <response> - tell hubot to react with <response> when it hears <term> (single word)
+//   hubot react "<term>" <response> - tell hubot to react with <response> when it hears <term> (multiple words)
 //   hubot ignore that - tell hubot to forget the last <term> <response> pair that was uttered.
 //
 // Author:
@@ -19,18 +20,11 @@ var _ = require('underscore');
 var natural = require('natural');
 
 var stemmer = natural.PorterStemmer;
+var ngrams = natural.NGrams.ngrams;
 
 var STORE_SIZE = process.env.HUBOT_REACT_STORE_SIZE ? parseInt(process.env.HUBOT_REACT_STORE_SIZE) : 200;
 
 var lastUsedResponse = null;
-
-function firstStem(text) {
-  return _.first(stemmer.tokenizeAndStem(text));
-}
-
-function uniqueStems(text) {
-  return _.unique(stemmer.tokenizeAndStem(text));
-}
 
 var successTmpl = _.template('Reacting to <%= term %> with <%= response %>');
 var responseTmpl = _.template('<%= response %>');
@@ -58,15 +52,40 @@ function lastResponseNotFoundMessage() {
 }
 
 function getResponses(retrieve, store, text) {
-  var stems = uniqueStems(text);
+  var stems = stemmer.tokenizeAndStem(text);
   var messageStore = retrieve('reactMessageStore');
+  var termSizes = retrieve('reactTermSizes');
 
-  return _.flatten(_.compact(_.map(stems, function(stem) {
-    return messageStore[stem] === undefined ? null : _.values(messageStore[stem]);
+  return _.flatten(_.compact(_.map(termSizes, function(count, size) {
+    size = parseInt(size);
+
+    //generate ngrams for sizes for which there are terms to react to
+    if (size > 0) {
+      return _.flatten(_.compact(_.map(ngrams(stems, size), function(ngram) {
+        ngramString = ngram.join(',');
+
+        if (messageStore[ngramString] === undefined) {
+          return null;
+        }
+
+        return _.values(messageStore[ngramString]);
+      })));
+    }
+
+    return null;
   })));
 }
 
-function ensureStoreSize(messageStore, size) {
+function deleteItem(messageStore, termSizes, stemsString, key) {
+  termSizes[messageStore[stemsString][key].stems.length]--;
+  delete messageStore[stemsString][key];
+
+  if (_.isEmpty(messageStore[stemsString])) {
+    delete messageStore[stemsString];
+  }
+}
+
+function ensureStoreSize(messageStore, termSizes, size) {
   var storeSize = _.reduce(_.values(messageStore), function(memo, value) {
     return memo + _.size(value);
   }, 0);
@@ -74,49 +93,67 @@ function ensureStoreSize(messageStore, size) {
   var keys = _.keys(_.first(messageStore));
   var key;
   var termKeys;
+  var termKey;
   while (storeSize > size) {
     key = randomItem(keys);
     termKeys = _.keys(messageStore[key]);
 
     if (termKeys.length > 0) {
-      delete messageStore[key][randomItem(termKeys)];
+      termKey = randomItem(termKeys);
+      deleteItem(messageStore, termSizes, key, termKey);
+
       storeSize--;
     }
   }
 }
 
 function addResponse(retrieve, store, term, response) {
-  var stem = firstStem(term);
+  var stems = stemmer.tokenizeAndStem(term);
+  var stemsString = stems.join(',');
   var messageStore = retrieve('reactMessageStore');
+  var termSizes = retrieve('reactTermSizes');
 
-  ensureStoreSize(messageStore, STORE_SIZE - 1);
+  ensureStoreSize(messageStore, termSizes, STORE_SIZE - 1);
 
-  messageStore[stem] = messageStore[stem] || {};
+  messageStore[stemsString] = messageStore[stemsString] || {};
 
-  messageStore[stem][response] = {
+  messageStore[stemsString][response] = {
     term: term,
-    stem: stem,
+    stems: stems,
+    stemsString: stemsString,
     response: response
   };
 
-  store('reactMessageStore', messageStore);
+  //keep track of number of words in each term so we know what sizes of ngrams to generate
+  termSizes[stems.length] = termSizes[stems.length] ? termSizes[stems.length] + 1 : 1;
 
-  return messageStore[stem][response];
+  store('reactMessageStore', messageStore);
+  store('reactTermSizes', termSizes);
+
+  return messageStore[stemsString][response];
 }
 
-function deleteResponse(retrieve, store, term, response) {
+function deleteResponse(retrieve, store, response) {
   var messageStore = retrieve('reactMessageStore');
+  var termSizes = retrieve('reactTermSizes');
 
-  var stem = firstStem(term);
-
-  if (messageStore[stem] !== undefined && messageStore[stem][response] !== undefined) {
-    delete messageStore[stem][response];
+  if (messageStore[response.stemsString] !== undefined && messageStore[response.stemsString][response.response] !== undefined) {
+    deleteItem(messageStore, termSizes, response.stemsString, response.response);
 
     store('reactMessageStore', messageStore);
+    store('reactTermSizes', termSizes);
 
     return true;
   }
   return false;
+}
+
+function computeTermSizes(messageStore) {
+  return _.reduce(messageStore, function(memo, responses, stemsString) {
+    var stems = stemsString.split(',');
+    memo[stems.length.toString()] = memo[stems.length] ? memo[stems.length] + 1 : 1;
+    return memo;
+  }, {});
 }
 
 function serialize(data) {
@@ -160,19 +197,25 @@ function start(robot) {
   robot.brain.setAutoSave(true);
 
   var messageStore = retrieve('reactMessageStore');
-  if (messageStore) {
-    ensureStoreSize(messageStore, STORE_SIZE);
-  }
-  else {
+  if (!messageStore) {
     messageStore = {};
   }
+
+  var termSizes = retrieve('reactTermSizes');
+  if (!termSizes) {
+    termSizes = computeTermSizes(messageStore);
+  }
+
+  ensureStoreSize(messageStore, termSizes, STORE_SIZE);
+
   store('reactMessageStore', messageStore);
+  store('reactTermSizes', termSizes);
 
   var hubotMessageRegex = new RegExp('^[@]?' + robot.name + '[:,]?\\s', 'i');
 
-  robot.respond(/react (\w*) (.*)/i, function(msg) {
-    var term = msg.match[1];
-    var response = msg.match[2];
+  robot.respond(/react ((\w*)|"(((\s*)?\w)*)") (.*)/i, function(msg) {
+    var term = msg.match[2] || msg.match[3];
+    var response = msg.match[6];
 
     var responseObj = add(term, response);
 
@@ -183,7 +226,7 @@ function start(robot) {
     var ignored = false;
 
     if (lastUsedResponse) {
-      ignored = del(lastUsedResponse.term, lastUsedResponse.response);
+      ignored = del(lastUsedResponse);
     }
 
     if (ignored) {

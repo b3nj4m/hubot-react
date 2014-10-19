@@ -21,7 +21,8 @@ It currently uses [natural](https://github.com/NaturalNode/natural)'s `PorterSte
 
 ### Commands
 
-`hubot react <term> <response>` - tell hubot to react with `<response>` when it hears `<term>`
+`hubot react <term> <response>` - tell hubot to react with `<response>` when it hears `<term>` (single word)
+`hubot react "<term>" <response>` - tell hubot to react with `<response>` when it hears `<term>` (multiple words)
 
 `hubot ignore that` - tell hubot to forget the last `<term>` `<response>` pair that was uttered.
 
