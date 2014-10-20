@@ -29,8 +29,8 @@
       <div id="main" role="main">
         <div class="download-bar">
         <div class="inner">
-          <a href="https://github.com/b3nj4m/hubot-react/archive/1.0.1.tar.gz" class="download-button tar"><span>Download</span></a>
-          <a href="https://github.com/b3nj4m/hubot-react/archive/1.0.1.zip" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/b3nj4m/hubot-react/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/b3nj4m/hubot-react/zipball/master" class="download-button zip"><span>Download</span></a>
           <a href="https://github.com/b3nj4m/hubot-react" class="code">View Hubot-react on GitHub</a>
         </div>
         <span class="blc"></span><span class="trc"></span>
@@ -48,18 +48,56 @@ Alice: Homestar Runner is the best.
 Hubot: seriously.
 </code></pre>
 
-<p>Configuration:</p>
+<h3>
+<a name="matching" class="anchor" href="#matching"><span class="octicon octicon-link"></span></a>Matching</h3>
 
-<ul>
-<li>
-<code>HUBOT_REACT_STORE_SIZE=N</code> - Remember at most N messages (default 200).</li>
-</ul>
+<p>It currently uses <a href="https://github.com/NaturalNode/natural">natural</a>'s <code>PorterStemmer</code> to match words regardless of conjugation, tense, etc. This is almost certainly going to change as I experiment with it more.</p>
 
-<p>Commands:</p>
+<h3>
+<a name="configuration" class="anchor" href="#configuration"><span class="octicon octicon-link"></span></a>Configuration</h3>
 
-<p><code>hubot react &lt;term&gt; &lt;response&gt;</code> - tell hubot to react with <code>&lt;response&gt;</code> when it hears <code>&lt;term&gt;</code></p>
+<h4>
+<a name="store-size" class="anchor" href="#store-size"><span class="octicon octicon-link"></span></a>Store size</h4>
 
-<p><code>hubot ignore that</code> - tell hubot to forget the last <code>&lt;term&gt;</code> <code>&lt;response&gt;</code> pair that was uttered.</p>
+<p>Remember at most <code>N</code> messages (default 200).</p>
+
+<pre><code>HUBOT_REACT_STORE_SIZE=N
+</code></pre>
+
+<h4>
+<a name="cache-size" class="anchor" href="#cache-size"><span class="octicon octicon-link"></span></a>Cache size</h4>
+
+<p>Throttle responses to the same terms for <code>N</code> seconds (default 300).</p>
+
+<pre><code>HUBOT_REACT_THROTTLE_EXPIRATION=N
+</code></pre>
+
+<h3>
+<a name="commands" class="anchor" href="#commands"><span class="octicon octicon-link"></span></a>Commands</h3>
+
+<h4>
+<a name="react-single-word-term" class="anchor" href="#react-single-word-term"><span class="octicon octicon-link"></span></a>React (single-word term)</h4>
+
+<p>Tell hubot to react with <code>&lt;response&gt;</code> when it hears <code>&lt;term&gt;</code>.</p>
+
+<pre><code>hubot react &lt;term&gt; &lt;response&gt;
+</code></pre>
+
+<h4>
+<a name="react-multi-word-term" class="anchor" href="#react-multi-word-term"><span class="octicon octicon-link"></span></a>React (multi-word term)</h4>
+
+<p>Tell hubot to react with <code>&lt;response&gt;</code> when it hears <code>&lt;term&gt;</code>.</p>
+
+<pre><code>hubot react "&lt;term&gt;" &lt;response&gt;
+</code></pre>
+
+<h4>
+<a name="ignore" class="anchor" href="#ignore"><span class="octicon octicon-link"></span></a>Ignore</h4>
+
+<p>Tell hubot to forget the last <code>&lt;term&gt;</code> <code>&lt;response&gt;</code> pair that was uttered.</p>
+
+<pre><code>hubot ignore that
+</code></pre>
         </article>
       </div>
     </div>
