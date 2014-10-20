@@ -24,7 +24,7 @@ Remember at most `N` messages (default 200).
 HUBOT_REACT_STORE_SIZE=N
 ```
 
-#### Cache size
+#### Throttle expiration
 
 Throttle responses to the same terms for `N` seconds (default 300).
 
