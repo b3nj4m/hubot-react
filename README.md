@@ -16,14 +16,46 @@ It currently uses [natural](https://github.com/NaturalNode/natural)'s `PorterSte
 
 ### Configuration
 
-- `HUBOT_REACT_STORE_SIZE=N` - Remember at most `N` messages (default 200).
-- `HUBOT_REACT_THROTTLE_EXPIRATION=N` - Throttle responses to the same terms for `N` seconds (default 300).
+#### Store size
+
+Remember at most `N` messages (default 200).
+
+```
+HUBOT_REACT_STORE_SIZE=N
+```
+
+#### Cache size
+
+Throttle responses to the same terms for `N` seconds (default 300).
+
+```
+HUBOT_REACT_THROTTLE_EXPIRATION=N
+```
 
 
 ### Commands
 
-`hubot react <term> <response>` - tell hubot to react with `<response>` when it hears `<term>` (single word)
-`hubot react "<term>" <response>` - tell hubot to react with `<response>` when it hears `<term>` (multiple words)
+#### React (single-word term)
 
-`hubot ignore that` - tell hubot to forget the last `<term>` `<response>` pair that was uttered.
+Tell hubot to react with `<response>` when it hears `<term>`.
+
+```
+hubot react <term> <response>
+```
+
+#### React (multi-word term)
+
+Tell hubot to react with `<response>` when it hears `<term>`.
+
+```
+hubot react "<term>" <response>
+```
+
+#### Ignore
+
+Tell hubot to forget the last `<term>` `<response>` pair that was uttered.
+
+```
+hubot ignore that
+```
 
