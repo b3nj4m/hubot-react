@@ -1,6 +1,6 @@
 {
   "name": "hubot-react",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Train hubot to react to certain terms.",
   "main": "index.js",
   "scripts": {
