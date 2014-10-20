@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "underscore": "~1.7.0",
-    "natural": "~0.1.28"
+    "natural": "~0.1.28",
+    "moment": "~2.8.3"
   }
 }

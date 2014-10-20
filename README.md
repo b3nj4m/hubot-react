@@ -16,7 +16,8 @@ It currently uses [natural](https://github.com/NaturalNode/natural)'s `PorterSte
 
 ### Configuration
 
-- `HUBOT_REACT_STORE_SIZE=N` - Remember at most N messages (default 200).
+- `HUBOT_REACT_STORE_SIZE=N` - Remember at most `N` messages (default 200).
+- `HUBOT_REACT_THROTTLE_EXPIRATION=N` - Throttle responses to the same terms for `N` seconds (default 300).
 
 
 ### Commands

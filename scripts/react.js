@@ -4,9 +4,11 @@
 // Dependencies:
 //   "underscore": "~1.7.0"
 //   "natural": "~0.1.28"
+//   "moment": "~2.8.3"
 //
 // Configuration:
 //   HUBOT_REACT_STORE_SIZE=N - Remember at most N messages (default 200).
+//   HUBOT_REACT_THROTTLE_EXPIRATION=N - Throttle responses to the same terms for N seconds (default 300).
 //
 // Commands:
 //   hubot react <term> <response> - tell hubot to react with <response> when it hears <term> (single word)
@@ -18,11 +20,13 @@
 
 var _ = require('underscore');
 var natural = require('natural');
+var moment = require('moment');
 
 var stemmer = natural.PorterStemmer;
 var ngrams = natural.NGrams.ngrams;
 
 var STORE_SIZE = process.env.HUBOT_REACT_STORE_SIZE ? parseInt(process.env.HUBOT_REACT_STORE_SIZE) : 200;
+var THROTTLE_EXPIRATION = process.env.HUBOT_REACT_THROTTLE_EXPIRATION ? parseInt(process.env.HUBOT_REACT_THROTTLE_EXPIRATION) : 300;
 
 var lastUsedResponse = null;
 
@@ -55,6 +59,7 @@ function getResponses(retrieve, store, text) {
   var stems = stemmer.tokenizeAndStem(text);
   var messageStore = retrieve('reactMessageStore');
   var termSizes = retrieve('reactTermSizes');
+  var responseUsageTimes = retrieve('reactResponseUsageTimes');
 
   return _.flatten(_.compact(_.map(termSizes, function(count, size) {
     size = parseInt(size);
@@ -64,7 +69,7 @@ function getResponses(retrieve, store, text) {
       return _.flatten(_.compact(_.map(ngrams(stems, size), function(ngram) {
         ngramString = ngram.join(',');
 
-        if (messageStore[ngramString] === undefined) {
+        if (messageStore[ngramString] === undefined || responseShouldBeThrottled(responseUsageTimes, ngramString)) {
           return null;
         }
 
@@ -148,6 +153,18 @@ function deleteResponse(retrieve, store, response) {
   return false;
 }
 
+function updateResponseUsageTime(retrieve, store, response) {
+  var responseUsageTimes = retrieve('reactResponseUsageTimes');
+
+  responseUsageTimes[response.stemsString] = moment.utc().toISOString();
+
+  store('reactResponseUsageTimes', responseUsageTimes);
+}
+
+function responseShouldBeThrottled(responseUsageTimes, stemsString) {
+  return responseUsageTimes[stemsString] !== undefined && moment.utc(responseUsageTimes[stemsString]).add(THROTTLE_EXPIRATION, 'seconds').isAfter();
+}
+
 function computeTermSizes(messageStore) {
   return _.reduce(messageStore, function(memo, responses, stemsString) {
     var stems = stemsString.split(',');
@@ -193,8 +210,13 @@ function start(robot) {
   var get = getResponses.bind(this, retrieve, store);
   var add = addResponse.bind(this, retrieve, store);
   var del = deleteResponse.bind(this, retrieve, store);
+  var responseUsed = updateResponseUsageTime.bind(this, retrieve, store);
 
   robot.brain.setAutoSave(true);
+
+  if (!retrieve('reactResponseUsageTimes')) {
+    store('reactResponseUsageTimes', {});
+  }
 
   var messageStore = retrieve('reactMessageStore');
   if (!messageStore) {
@@ -250,6 +272,7 @@ function start(robot) {
         var response = randomItem(responses);
         msg.send(responseToString(response));
         lastUsedResponse = response;
+        responseUsed(response);
       }
     }
   });
