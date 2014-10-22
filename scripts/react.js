@@ -120,6 +120,7 @@ function addResponse(retrieve, store, term, response) {
 
   ensureStoreSize(messageStore, termSizes, STORE_SIZE - 1);
 
+  //TODO add preceding underscore or something to keys in case they conflict with read-only object properties
   messageStore[stemsString] = messageStore[stemsString] || {};
 
   messageStore[stemsString][response] = {
@@ -233,7 +234,7 @@ function start(robot) {
   store('reactMessageStore', messageStore);
   store('reactTermSizes', termSizes);
 
-  var hubotMessageRegex = new RegExp('^[@]?' + robot.name + '[:,]?\\s', 'i');
+  var hubotMessageRegex = new RegExp('^[@]?(' + robot.name + ')' + (robot.alias ? '|(' + robot.alias + ')' : '') + '[:,]?\\s', 'i');
 
   robot.respond(/react ((\w*)|"(((\s*)?\w)*)") (.*)/i, function(msg) {
     var term = msg.match[2] || msg.match[3];
