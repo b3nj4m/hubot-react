@@ -32,6 +32,13 @@ Throttle responses to the same terms for `N` seconds (default 300).
 HUBOT_REACT_THROTTLE_EXPIRATION=N
 ```
 
+#### Initialization timeout
+
+Wait for N milliseconds for hubot to initialize and load brain data from redis. (default 10000)
+
+```
+HUBOT_REACT_INIT_TIMEOUT=N
+```
 
 ### Commands
 

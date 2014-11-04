@@ -9,6 +9,7 @@
 // Configuration:
 //   HUBOT_REACT_STORE_SIZE=N - Remember at most N messages (default 200).
 //   HUBOT_REACT_THROTTLE_EXPIRATION=N - Throttle responses to the same terms for N seconds (default 300).
+//   HUBOT_REACT_INIT_TIMEOUT=N - wait for N milliseconds for brain data to load from redis. (default 10000)
 //
 // Commands:
 //   hubot react <term> <response> - tell hubot to react with <response> when it hears <term> (single word)
@@ -27,6 +28,7 @@ var ngrams = natural.NGrams.ngrams;
 
 var STORE_SIZE = process.env.HUBOT_REACT_STORE_SIZE ? parseInt(process.env.HUBOT_REACT_STORE_SIZE) : 200;
 var THROTTLE_EXPIRATION = process.env.HUBOT_REACT_THROTTLE_EXPIRATION ? parseInt(process.env.HUBOT_REACT_THROTTLE_EXPIRATION) : 300;
+var INIT_TIMEOUT = process.env.HUBOT_REACT_INIT_TIMEOUT ? parseInt(process.env.HUBOT_REACT_INIT_TIMEOUT) : 10000;
 
 var lastUsedResponse = null;
 
@@ -280,12 +282,14 @@ function start(robot) {
 }
 
 module.exports = function(robot) {
-  var loaded = function() {
+  var loaded = _.once(function() {
+    console.log('starting hubot-react...');
     start(robot);
-  };
+  });
 
   if (_.isEmpty(robot.brain.data) || _.isEmpty(robot.brain.data._private)) {
     robot.brain.once('loaded', loaded);
+    setTimeout(loaded, INIT_TIMEOUT);
   }
   else {
     loaded();
