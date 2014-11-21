@@ -60,7 +60,8 @@ function lastResponseNotFoundMessage() {
 }
 
 function getResponses(retrieve, store, text) {
-  var stems = stemmer.tokenizeAndStem(text);
+  text = text.toLowerCase();
+  var stems = stemmer.tokenizeAndStem(text).sort();
   var messageStore = retrieve('reactMessageStore');
   var termSizes = retrieve('reactTermSizes');
   var responseUsageTimes = retrieve('reactResponseUsageTimes');
@@ -78,6 +79,12 @@ function getResponses(retrieve, store, text) {
         }
 
         return _.values(messageStore[ngramString]);
+      })));
+    }
+    //test exact matches
+    else if (size === 0) {
+      return _.flatten(_.compact(_.map(messageStore, function(responses, key) {
+        return text.indexOf(key) > -1 ? _.values(responses) : null;
       })));
     }
 
@@ -117,8 +124,9 @@ function ensureStoreSize(messageStore, termSizes, size) {
 }
 
 function addResponse(retrieve, store, term, response) {
-  var stems = stemmer.tokenizeAndStem(term);
-  var stemsString = stems.join(',');
+  //only use stemmer for things that look like words
+  var stems = /^[\w\s]+$/i.test(term) ? stemmer.tokenizeAndStem(term).sort() : [];
+  var stemsString = stems.join(',') || term.toLowerCase();
   var messageStore = retrieve('reactMessageStore');
   var termSizes = retrieve('reactTermSizes');
 
@@ -135,6 +143,7 @@ function addResponse(retrieve, store, term, response) {
   };
 
   //keep track of number of words in each term so we know what sizes of ngrams to generate
+  //terms with empty stems (e.g. @#$) will have termSize 0
   termSizes[stems.length] = termSizes[stems.length] ? termSizes[stems.length] + 1 : 1;
 
   store('reactMessageStore', messageStore);
@@ -255,9 +264,9 @@ function start(robot) {
 
   var hubotMessageRegex = new RegExp('^[@]?(' + robot.name + ')' + (robot.alias ? '|(' + robot.alias + ')' : '') + '[:,]?\\s', 'i');
 
-  robot.respond(/react ((\w*)|"(((\s*)?\w)*)") (.*)/i, function(msg) {
+  robot.respond(/react (([^\s]*)|"([^"]*)") (.*)/i, function(msg) {
     var term = msg.match[2] || msg.match[3];
-    var response = msg.match[6];
+    var response = msg.match[4];
 
     var responseObj = add(term, response);
 
