@@ -2,9 +2,10 @@
 //   Train hubot to react to certain terms.
 //
 // Dependencies:
-//   "underscore": "~1.7.0"
-//   "natural": "~0.1.28"
-//   "moment": "~2.8.3"
+//   underscore: ~1.7.0
+//   natural: ~0.1.28
+//   moment: ~2.8.3
+//   msgpack: ~0.2.4
 //
 // Configuration:
 //   HUBOT_REACT_STORE_SIZE=N - Remember at most N messages (default 200).
@@ -22,6 +23,7 @@
 var _ = require('underscore');
 var natural = require('natural');
 var moment = require('moment');
+var msgpack = require('msgpack');
 
 var stemmer = natural.PorterStemmer;
 var ngrams = natural.NGrams.ngrams;
@@ -177,8 +179,10 @@ function computeTermSizes(messageStore) {
 }
 
 function serialize(data) {
+  var string;
+
   try {
-    string = JSON.stringify(data);
+    string = msgpack.pack(data);
   }
   catch (err) {
     //emit error?
@@ -188,11 +192,24 @@ function serialize(data) {
 }
 
 function deserialize(string) {
+  var data;
+
+  //legacy (3.x and older) data was stored as JSON
   try {
     data = JSON.parse(string);
   }
   catch (err) {
     //emit error?
+  }
+
+  //new data is stored as msgpack
+  if (!data) {
+    try {
+      data = msgpack.unpack(new Buffer(string));
+    }
+    catch (err) {
+      //emit error?
+    }
   }
 
   return data;
@@ -222,12 +239,12 @@ function start(robot) {
   }
 
   var messageStore = retrieve('reactMessageStore');
-  if (!messageStore) {
+  if (!_.isObject(messageStore)) {
     messageStore = {};
   }
 
   var termSizes = retrieve('reactTermSizes');
-  if (!termSizes) {
+  if (!_.isObject(termSizes)) {
     termSizes = computeTermSizes(messageStore);
   }
 
