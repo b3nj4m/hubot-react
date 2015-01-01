@@ -84,7 +84,7 @@ function getResponses(retrieve, store, text) {
     //test exact matches
     else if (size === 0) {
       return _.flatten(_.compact(_.map(messageStore, function(responses, key) {
-        return text.indexOf(key) > -1 ? _.values(responses) : null;
+        return text.indexOf(key) > -1 && !responseShouldBeThrottled(responseUsageTimes, key) ? _.values(responses) : null;
       })));
     }
 
@@ -170,7 +170,7 @@ function deleteResponse(retrieve, store, response) {
 function updateResponseUsageTime(retrieve, store, response) {
   var responseUsageTimes = retrieve('reactResponseUsageTimes');
 
-  responseUsageTimes[response.stemsString] = moment.utc().toISOString();
+  responseUsageTimes[response.stemsString || response.term] = moment.utc().toISOString();
 
   store('reactResponseUsageTimes', responseUsageTimes);
 }
