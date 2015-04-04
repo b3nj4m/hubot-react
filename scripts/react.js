@@ -299,7 +299,7 @@ function start(robot) {
 
       if (responses.length > 0) {
         var response = randomItem(responses);
-        msg.send(responseToString(response));
+        setTimeout(function() { msg.send(responseToString(response) }, 4000);
         lastUsedResponse = response;
         responseUsed(response);
       }
