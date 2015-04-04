@@ -305,7 +305,7 @@ function start(robot) {
         var formattedResponse = responseToString(response);
         var baseDelay = RESPONSE_DELAY_PER_WORD*formattedResponse.split(" ").length;
         var totalDelay = Math.random() * (baseDelay*1.5 - baseDelay*0.75) + baseDelay*0.75;
-        setTimeout(function() { msg.send(formattedResponse) }, totalDelay);
+        setTimeout(function() { msg.send(responseToString(formattedResponse)) }, totalDelay);
         lastUsedResponse = response;
         responseUsed(response);
       }
