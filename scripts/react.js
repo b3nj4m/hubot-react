@@ -32,9 +32,6 @@ var STORE_SIZE = process.env.HUBOT_REACT_STORE_SIZE ? parseInt(process.env.HUBOT
 var THROTTLE_EXPIRATION = process.env.HUBOT_REACT_THROTTLE_EXPIRATION ? parseInt(process.env.HUBOT_REACT_THROTTLE_EXPIRATION) : 300;
 var INIT_TIMEOUT = process.env.HUBOT_REACT_INIT_TIMEOUT ? parseInt(process.env.HUBOT_REACT_INIT_TIMEOUT) : 10000;
 
-// TEST CONSTS
-var RESPONSE_DELAY_PER_WORD = 600; // 600ms per word on average, inclusive of thought processes
-
 var lastUsedResponse = null;
 
 var successTmpl = _.template('Reacting to <%= term %> with <%= response %>');
@@ -302,10 +299,7 @@ function start(robot) {
 
       if (responses.length > 0) {
         var response = randomItem(responses);
-        var formattedResponse = responseToString(response);
-        var baseDelay = RESPONSE_DELAY_PER_WORD*formattedResponse.split(" ").length;
-        var totalDelay = Math.random() * (baseDelay*1.5 - baseDelay*0.75) + baseDelay*0.75;
-        setTimeout(function() { msg.send(formattedResponse); }, 4000);
+        setTimeout(function() { msg.send(responseToString(response)); }, 4000);
         lastUsedResponse = response;
         responseUsed(response);
       }
