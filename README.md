@@ -3,7 +3,7 @@
 Train hubot to react to certain terms. Multiple responses to the same term are allowed. One will be selected at-random.
 
 ```
-Bob: hubot react homestar seriously.
+Bob: hubot react to "homestar" with "seriously".
 Hubot: reacting to homestar with seriously.
 ...
 Alice: Homestar Runner is the best.
@@ -47,7 +47,7 @@ HUBOT_REACT_INIT_TIMEOUT=N
 Tell hubot to react with `<response>` when it hears `<term>`.
 
 ```
-hubot react <term> <response>
+hubot react to "<term>" with "<response>"
 ```
 
 #### React (multi-word term)
@@ -55,7 +55,7 @@ hubot react <term> <response>
 Tell hubot to react with `<response>` when it hears `<term>`.
 
 ```
-hubot react "<term>" <response>
+hubot react to "<term>" with "<response>"
 ```
 
 #### Ignore
