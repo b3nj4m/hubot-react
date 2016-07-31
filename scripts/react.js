@@ -264,9 +264,9 @@ function start(robot) {
 
   var hubotMessageRegex = new RegExp('^[@]?(' + robot.name + ')' + (robot.alias ? '|(' + robot.alias + ')' : '') + '[:,]?\\s', 'i');
 
-  robot.respond(/react (([^\s]*)|"([^"]*)") (.*)/i, function(msg) {
-    var term = msg.match[2] || msg.match[3];
-    var response = msg.match[4];
+  robot.respond(/react "([^"]*)" (.*)/i, function(msg) {
+    var term = msg.match[1];
+    var response = msg.match[2];
 
     var responseObj = add(term, response);
 
