@@ -25,6 +25,6 @@
     "underscore": "~1.7.0",
     "natural": "~0.1.28",
     "moment": "~2.8.3",
-    "msgpack": "~0.2.4"
+    "msgpack": "~1.0.2"
   }
 }
